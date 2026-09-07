@@ -1,0 +1,45 @@
+Creative Commons Attribution 4.0 International (CC BY 4.0)
+
+Copyright (c) 2026 Andrey Bessa
+
+This license covers the DATA AND DOCUMENTATION in this repository, namely:
+
+  - data/matopiba_fire_human_gt_v1.csv
+  - data/matopiba_fire_full_panel_v1.csv
+  - data/matopiba_states_polygon.geojson
+  - data/DATA_DICTIONARY.md
+  - docs/ANNOTATION_PROTOCOL.md
+  - docs/REPRODUCTION.md
+  - README.md
+  - CITATION.cff
+
+It covers the human annotations, the derived features, and the written
+documentation of the package. It does NOT cover the source code, which is
+licensed separately under the MIT License (see LICENSE).
+
+By exercising the Licensed Rights (defined in the full license text), You accept
+and agree to be bound by the terms and conditions of this Creative Commons
+Attribution 4.0 International Public License ("Public License"). To the extent
+this Public License may be interpreted as a contract, You are granted the
+Licensed Rights in consideration of Your acceptance of these terms and
+conditions, and the Licensor grants You such rights in consideration of benefits
+the Licensor receives from making the Licensed Material available under these
+terms and conditions.
+
+Full license text: https://creativecommons.org/licenses/by/4.0/legalcode
+
+In short:
+  - You are free to share (copy and redistribute the material in any medium or
+    format) and adapt (remix, transform, and build upon the material for any
+    purpose, even commercially).
+  - You must give appropriate credit, provide a link to the license, and indicate
+    if changes were made.
+
+THIRD-PARTY SOURCE PRODUCTS
+The features distributed here are values derived point by point from third-party
+products, which remain under the licenses of their own providers and require the
+attribution each provider demands: NASA FIRMS, NASA MODIS MCD64A1, ESA Copernicus
+Sentinel-2, ECMWF ERA5, MapBiomas (Fogo and Land Cover), and CENSIPAM Painel do
+Fogo. No third-party product is redistributed in its original form. The state
+polygons in data/matopiba_states_polygon.geojson derive from Natural Earth 10m
+admin_1_states_provinces, which is public domain.

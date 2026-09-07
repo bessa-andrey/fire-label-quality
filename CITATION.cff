@@ -1,0 +1,41 @@
+cff-version: 1.2.0
+message: "If you use this dataset or code, please cite the dissertation below."
+title: "fire-label-quality: labeling strategies for satellite fire hotspot classification in the MATOPIBA region"
+abstract: >-
+  Five independent label sources for the same NASA FIRMS fire detections in the Brazilian
+  MATOPIBA region, with 22 engineered features per detection and the pipeline that
+  reproduces the comparison between them. Includes 604 detections annotated under a blind
+  protocol. Code is licensed under MIT, data and documentation under CC BY 4.0.
+type: dataset
+version: 1.0.0
+date-released: "2026-09-07"
+license: CC-BY-4.0
+license-url: "https://creativecommons.org/licenses/by/4.0/"
+keywords:
+  - fire detection
+  - label quality
+  - weak supervision
+  - MATOPIBA
+  - Cerrado
+  - remote sensing
+  - VIIRS
+  - MODIS
+  - Sentinel-2
+  - inter-source agreement
+authors:
+  - family-names: Bessa
+    given-names: "Andrey Rúben Ribeiro"
+    affiliation: "Universidade Federal do Amazonas (UFAM), PPGEE"
+    email: andrey.bessa@ufam.edu.br
+references:
+  - type: thesis
+    title: >-
+      Estratégias de Rotulagem para Classificação de Focos de Incêndio por Satélite na
+      Região MATOPIBA
+    thesis-type: "Dissertação de Mestrado"
+    authors:
+      - family-names: Bessa
+        given-names: "Andrey Rúben Ribeiro"
+    institution:
+      name: "Universidade Federal do Amazonas"
+    year: 2026

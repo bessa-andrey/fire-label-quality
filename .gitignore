@@ -1,0 +1,28 @@
+# Saidas dos experimentos. Regeneradas pelos scripts, nunca versionadas.
+outputs/
+
+# Insumos intermediarios que `prepare_inputs.py` deriva de `data/`.
+data/processed/
+
+# Dados brutos dos provedores, que cada usuario baixa com a propria credencial.
+data/raw/
+
+# Credenciais. Nenhuma delas pertence a este repositorio.
+.env
+*.pem
+*.key
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+.pytest_cache/
+
+# Sistema operacional e editores
+.DS_Store
+Thumbs.db
+
+# Copia que `prepare_inputs.py` grava sob o nome que o pipeline espera.
+data/matopiba_limites.geojson
