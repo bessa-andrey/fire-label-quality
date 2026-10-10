@@ -6,6 +6,11 @@ features espectrais Sentinel-2 vivem num arquivo proprio, montado pela etapa de
 extracao. O pacote publicado ja traz essas colunas mescladas nos dois CSV, entao este
 script apenas reverte a mescla e grava o arquivo no caminho esperado.
 
+Aquele arquivo de extracao cobre so 2022, e o experimento decisivo tira dele as suas
+espectrais, entao aqui ele e remontado a partir do painel e so dele. O painel estendido,
+de onde os dois experimentos de holdout puxam as suas, e que recebe tambem a referencia
+humana, com as espectrais de 2023 e 2024 que o pacote passou a publicar.
+
 Alguns scripts tambem procuram a referencia humana e o painel em caminhos fixos, sem
 opcao de linha de comando. Para eles este script grava copias dos arquivos publicados
 nesses caminhos. Nenhum dado novo e criado, apenas movido para onde o pipeline procura.
@@ -60,9 +65,10 @@ COPIAS = [
 # Caminho onde os experimentos de holdout procuram o painel de onde puxam as features
 # espectrais por merge. O painel publicado cobre 2022 e a referencia humana vai ate
 # dezembro de 2024, entao as 120 deteccoes anotadas de 2023 e 2024 so entram aqui por
-# meio da propria referencia. Elas entram sem as nove colunas espectrais, que o pacote
-# publicado nao carrega para esses dois anos. A consequencia esta registrada em
-# docs/REPRODUCTION.md, na secao de limitacoes.
+# meio da propria referencia. Elas entram COM as nove colunas espectrais desde a revisao
+# de setembro de 2026, que passou a enriquecer a referencia humana publicada a partir do
+# painel estendido. E o que faz o LOSO de 22 features rodar a n = 453 e o cenario
+# cross-year do holdout temporal ter teste.
 PAINEL_ESTENDIDO = Path('outputs') / 'ground_truth_validation' / 'painel_labeled_expanded.csv'
 
 
@@ -78,9 +84,16 @@ def main():
     if faltando:
         raise SystemExit(f'ERRO: {PANEL_CSV.name} nao carrega as colunas {faltando}.')
 
+    # So o painel alimenta este arquivo. No layout de trabalho da pesquisa,
+    # `sentinel2_features.csv` e a saida da extracao Sentinel-2 e cobre so as 3.698
+    # deteccoes de 2022, e o experimento decisivo tira dele as suas espectrais. Fundir a
+    # referencia humana aqui injetava as 120 deteccoes anotadas de 2023 e 2024 nessa
+    # fonte e movia o filtro `dnbr_mean.notna()`, o que tirava o track de 22 features de
+    # n = 439 para n = 534 e fazia os quinze Kappa da comparacao principal divergirem do
+    # publicado. As espectrais da referencia humana continuam disponiveis pelo painel
+    # estendido, que e por onde os dois experimentos de holdout as procuram.
     keep = KEY_COLS + SPECTRAL_COLS
-    espectral = pd.concat([panel[keep], gt[keep]], ignore_index=True)
-    espectral = espectral.drop_duplicates(subset=KEY_COLS)
+    espectral = panel[keep].drop_duplicates(subset=KEY_COLS)
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     destino = OUT_DIR / 'sentinel2_features.csv'

@@ -60,6 +60,17 @@ This document describes every column of the CSV files in this Zenodo bundle.
 | `pct_burned` | float | 0-1 | Fraction of buffer pixels with dNBR > 0.1. |
 | `land_use_class` | int | MapBiomas code | MapBiomas Collection 8 land use class (4 = Savanna Formation; full legend at mapbiomas.org). For 2023-2024 samples, imputed as 4 (mode of 2022) due to MapBiomas Collection 8 temporal coverage. |
 
+**Coverage of the spectral block, measured on this file.** Of the 604 rows, 573 carry all
+eight scene-derived columns (every column above except `land_use_class`), 597 carry at
+least one, and 601 carry `land_use_class`. By year: 471 of the 484 rows of 2022, 50 of the
+54 of 2023 and 52 of the 66 of 2024 are complete on the eight. A row is incomplete where
+no cloud-free Sentinel-2 scene was available in the pre-fire or the post-fire window.
+
+Until the September 2026 revision the 120 rows of 2023 and 2024 carried no spectral value
+at all, because this file was enriched from the 2022 panel. It is now enriched from the
+extended panel, which covers the three years. The change is strictly additive: it fills
+empty cells and overwrites nothing, and the 2022 rows are identical series to series.
+
 ---
 
 ## `data/matopiba_fire_full_panel_v1.csv` (3,698 rows, 2022 only)
@@ -95,24 +106,19 @@ the MapBiomas Fogo label and all 22 features are untouched.
 
 ## `data/matopiba_states_polygon.geojson`
 
-Single FeatureCollection with **four** features, one per state, totalling 1,633
-vertices. There is no aggregate MATOPIBA polygon and no `estado` column: states are
-identified by the `name` property, spelled out in full.
+Single FeatureCollection with four features and 1,633 vertices in total. Each feature carries
+three properties, `name`, `color` and `description`, where `color` is a display hex only. There
+is no `estado` property and no aggregate region feature.
 
-| `name` | Geometry | Vertices | Description |
-|--------|----------|---------:|-------------|
-| `Maranhão` | MultiPolygon | 871 | MATOPIBA portion of the state. |
-| `Tocantins` | Polygon | 280 | Whole state, which lies entirely within MATOPIBA. |
-| `Piauí` | Polygon | 265 | MATOPIBA portion of the state. |
-| `Bahia` | Polygon | 217 | MATOPIBA portion of the state. |
+| `name` | Geometry | Vertices | `description` |
+|--------|----------|---------:|---------------|
+| Maranhão | MultiPolygon | 871 | MATOPIBA portion of Maranhão. |
+| Tocantins | Polygon | 280 | Tocantins, whose whole territory lies within MATOPIBA. |
+| Piauí | Polygon | 265 | MATOPIBA portion of Piauí. |
+| Bahia | Polygon | 217 | MATOPIBA portion of Bahia. |
 
-Each feature also carries `color` (a hex string used for plotting) and `description`
-(free text). CRS: EPSG:4326 (WGS84 geographic).
+Source, as recorded in the FeatureCollection's own `properties` member: Natural Earth 10m
+(`admin_1_states_provinces`), clipped to the MATOPIBA bounding box (west -50.0, east -41.5,
+south -15.5, north -1.0).
 
-Point-in-polygon assignment of the 604 annotated detections places 453 of them inside
-one of the four polygons, so 81 of the 534 usable samples fall outside. This is the
-partition used by the Leave-One-State-Out experiment, which therefore runs on n = 453.
-Bounding-box approximations of the same states are computed as a comparison column only,
-never as the partition.
-
-Provenance: derived from Natural Earth 10m `admin_1_states_provinces`, public domain.
+CRS: EPSG:4326 (WGS84 geographic), the GeoJSON default under RFC 7946.

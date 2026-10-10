@@ -22,10 +22,10 @@ by git.
 |---------|------------|
 | `python examples/pairwise_agreement.py` | The four agreement values against the human reference |
 | `python src/models/compute_extended_concordance.py --gt-csv data/matopiba_fire_human_gt_v1.csv --painel-csv data/matopiba_fire_full_panel_v1.csv` | The full 10-pair agreement matrix, with p0, kappa, AC1, PI and BI |
-| `python src/models/run_decisive_experiment.py --features 22 --gt-csv data/matopiba_fire_human_gt_v1.csv --painel-csv data/matopiba_fire_full_panel_v1.csv` | The main comparison, 6 classifiers by 5 labeling strategies, plus the feature-importance panel |
-| `python src/models/run_decisive_experiment.py --features 13 --gt-csv data/matopiba_fire_human_gt_v1.csv --painel-csv data/matopiba_fire_full_panel_v1.csv` | The same comparison restricted to the 13 non-spectral features |
-| `python src/models/temporal_holdout_experiment.py --decisive-csv outputs/decisive_experiment/decisive_results.csv` | Temporal holdout. The within-2022 scenario runs. The cross-year scenario cannot, see the limitation below |
-| `python src/models/spatial_holdout_experiment.py` | Leave-One-State-Out over the four state polygons. The 13-feature scenario reproduces exactly at n = 453. The 22-feature scenario runs at n = 373, see the limitation below |
+| `python src/models/run_decisive_experiment.py --features 22 --gt-csv data/processed/validation/validation_manual_gt.csv --painel-csv data/matopiba_fire_full_panel_v1.csv` | The main comparison, 6 classifiers by 5 labeling strategies, plus the feature-importance panel. The `--gt-csv` is the copy `prepare_inputs.py` writes, see the note below |
+| `python src/models/run_decisive_experiment.py --features 13 --gt-csv data/processed/validation/validation_manual_gt.csv --painel-csv data/matopiba_fire_full_panel_v1.csv` | The same comparison restricted to the 13 non-spectral features |
+| `python src/models/temporal_holdout_experiment.py --decisive-csv outputs/decisive_experiment_22feat/decisive_results.csv` | Temporal holdout, both scenarios. The cross-year one trains on 2022 (n = 439) and tests on 2023 and 2024 (n = 95) |
+| `python src/models/spatial_holdout_experiment.py` | Leave-One-State-Out over the four state polygons, at n = 453 in both the 13-feature and the 22-feature scenario |
 | `python src/models/learning_curve.py` | Kappa as a function of training set size |
 | `python src/models/evaluate_baselines.py --gt-path data/matopiba_fire_human_gt_v1.csv` | The FIRMS-confidence and dNBR-threshold baselines |
 | `python src/models/dawid_skene_label_sources.py --gt-csv data/matopiba_fire_human_gt_v1.csv --painel-csv data/matopiba_fire_full_panel_v1.csv` | Dawid-Skene sensitivity and specificity per label source |
@@ -34,25 +34,34 @@ by git.
 | `python scripts/sensibilidade_convencao_rotulagem.py --gt-csv data/matopiba_fire_human_gt_v1.csv --painel-csv data/matopiba_fire_full_panel_v1.csv` | Sensitivity of the agreement matrix to the labeling convention |
 | `python scripts/concordancia_ic_matriz.py` | Bootstrap 95% confidence intervals for the pairs involving the human reference |
 
-### A limitation of the published data, measured
+### Two human-reference files, and which command takes which
 
-The two CSVs were checked column by column. The nine Sentinel-2 spectral features are
-present for 471 of the 484 annotated detections of 2022 and for **none** of the 120
-annotated detections of 2023 and 2024. Only the FIRMS and ERA5 columns exist for those
-two years.
+`prepare_inputs.py` writes `data/processed/validation/validation_manual_gt.csv`, a copy of
+the published human reference **without** the nine spectral columns. That copy is not a
+convenience: it is what fixes the evaluation subset of the main comparison, and the table
+above uses it on purpose.
 
-Two consequences follow, and both are visible when the commands above are run:
+The main comparison merges its spectral features from `data/processed/sentinel2_features.csv`,
+which covers the 3,698 detections of 2022. Its 22-feature track is then filtered by
+`dnbr_mean.notna()`, which leaves n = 439 of the 535 detections labelled Real or Spurious.
+That is the n printed in the dissertation. The merge completes rather than replaces, so
+passing `data/matopiba_fire_human_gt_v1.csv` instead would carry the spectral columns of
+2023 and 2024 straight into the filter, move it to n = 534, and change all fifteen kappa
+values of the 13-vs-22 table, by up to 0.126. Use the copy the setup step writes.
 
-1. Leave-One-State-Out with 22 features drops from n = 453 to n = 373, because the 80
-   detections of 2023 and 2024 that fall inside a state polygon are discarded for want of
-   spectral features. The five per-model kappa values shift accordingly. The 13-feature
-   scenario is unaffected and reproduces the published values exactly, all five models.
-2. The cross-year temporal holdout, which trains on 2022 and tests on 2023 and 2024, ends
-   with an empty test set and is skipped by the script, which reports
-   `Teste: n=0 ... Pulando`. The within-2022 scenario runs normally.
+Four other commands read the extended panel, which `prepare_inputs.py` builds from the
+panel plus the published human reference, spectral columns included. That is why
+Leave-One-State-Out runs at n = 453 with 22 features, the cross-year holdout has a test set
+of n = 95, the learning curve runs on the consolidated n = 534, and the consensual-error
+analysis finds the 58 detections reported in the dissertation, 43 false negatives and 15
+false positives.
 
-Everything else in the first table is unaffected, because the agreement matrix and the
-main classifier comparison are both anchored on the 2022 subset with complete coverage.
+Coverage of the spectral block in the published human reference, measured on the file: 573
+of the 604 rows carry all eight scene-derived columns, 597 carry at least one, and 601
+carry `land_use_class`. A row is incomplete where no cloud-free Sentinel-2 scene was
+available in the pre-fire or the post-fire window. Until the September 2026 revision the
+120 rows of 2023 and 2024 carried none at all, and both holdout experiments were degraded
+by it, one running at n = 373 and the other skipped for an empty test set.
 
 ### Verified reproduction
 
@@ -61,6 +70,20 @@ dissertation tables. The 6 by 5 result matrix came back with a maximum numeric d
 of `0.0` across all 41 columns. The ten agreement pairs match the published table cell by
 cell, and `examples/pairwise_agreement.py` returns the four human-reference values exactly
 as printed there.
+
+The three experiments that depend on the spectral block were re-run as well, with the
+commands exactly as they appear above. The main comparison evaluates on n = 439 and its
+sixteen-column comparison file comes back at a maximum difference of `0.0` against the run
+that produced the printed table. Leave-One-State-Out with 22 features runs at n = 453 and
+reproduces all twenty cells of the spatial-holdout table. The cross-year holdout tests on
+n = 95 and reproduces all fifteen cells of the temporal-holdout table. The learning curve
+reproduces both of its variants, ten mean-kappa points and four Wilcoxon p-values, and the
+consensual-error analysis returns 58 detections split 43 to 15.
+
+One printed value does not reproduce, and the package is not the reason. The 13-vs-22
+table prints 0.202 for Extra Trees in the 19-features-without-dNBR column. The underlying
+value is 0.201481, in the run that produced the table and in every run since. It is a
+rounding slip in the manuscript, not a difference between the package and the source.
 
 ## What needs more than the published data
 
